@@ -5,6 +5,11 @@ from os.path import exists
 
 from redlib.api.prnt import *
 from imgurpython import ImgurClient
+from imgurpython.helpers import GalleryAlbum, GalleryImage
+
+
+class ImgurError(Exception):
+	pass
 
 
 class Imgur:
@@ -12,9 +17,16 @@ class Imgur:
 	client_id = '3210fb6c4dc60b8'
 	cred_file = '.cred'
 
+	image_types = ['jpg', 'png', 'gif', 'anigif', 'album']
+	image_sizes = {'small': 'small', 'medium': 'med', 'big': 'big', 'large': 'lrg', 'huge': 'huge'}
+	query_types = {'all': 'q_all', 'any': 'q_any', 'exactly': 'q_exactly', 'not': 'q_not'}
+
+	sort_options = ['time', 'viral', 'top']
+	window_options = ['week', 'month', 'year', 'all']
+
 
 	def __init__(self):
-		self.client = ImgurClient(self.client_id, '') #self.client_secret)
+		self.client = ImgurClient(self.client_id, '')
 
 	
 	def auth(self):
@@ -62,15 +74,47 @@ class Imgur:
 		print(acct)
 
 
-	def search(self, query):
-		result = self.client.gallery_search('ignored', advanced={'q_type': 'jpg', 'q_size_px': 'med', 'q_all': query})
-		for r in result:
-			if getattr(r, 'width', None) is not None:
-				prints('%dx%d'%(r.width, r.height))
-			if getattr(r, 'type', None) is not None:
-				prints(' ' + r.type)
+	def search(self, query, image_type, image_size, query_type, sort, window, pages, max_results=None):
+		advanced = None
 
-			print()
+		if any(i is not None for i in [image_type, image_size, query_type]):
+			advanced = {}
+			if image_type is not None:
+				advanced['q_type'] = image_type
+			if image_size is not None:
+				advanced['q_size_px'] = self.image_sizes[image_size]
+			if query_type is not None:
+				advanced[self.query_types[query_type]] = query
+
+		result_start = 1
+		for page in range(0, pages):
+			result = self.client.gallery_search(query, advanced=advanced, sort=sort, window=window, page=page)
+			if max_results is not None:
+				d = max_results - result_start + 1
+				if d < len(result):
+					del result[d : len(result)]
+
+			self.print_result(result, result_start)
+			result_start += len(result)
+
+
+	def print_result(self, result, start_count):
+		count = start_count
+		up_arrow = u'\u2b06'
+		down_arrow = u'\u2b07'
+
+		for r in result:
+			print(u'{0:03d}. {1}'.format(count, r.title))
+
+			if type(r) == GalleryImage:
+				width = getattr(r, 'width', 0)
+				height = getattr(r, 'height', 0)
+				dimensions = '%dx%d'%(width, height)
+				score = u'%s %d %s %d'%(up_arrow, r.ups, down_arrow, r.downs)
+				print(u'  {0:<8} {1:<10} {2:<14} {3}'.format('Image', dimensions, score, r.link))
+			else:
+				print('  {0:<8} {1:<12} {2}'.format('Album', str(r.images_count) + ' images', r.link))
+			count += 1
 
 
 	def album(self, aid):

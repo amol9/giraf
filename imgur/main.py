@@ -1,8 +1,9 @@
 
-from redcmd.api import commandline_execute()
+from redcmd.api import commandline_execute
 
 from .client import Client
 from . import const
+from .version import __version__
 
 
 def main():
