@@ -1,6 +1,8 @@
 
 from redcmd.api import Subcommand, subcmd, Arg, CommandError
 from .cls_imgur import Imgur, ImgurError
+from .result_printer import ResultPrinter
+from .enums import *
 
 
 class Client(Subcommand):
@@ -14,7 +16,7 @@ class Client(Subcommand):
 			if self._imgur is None:
 				self._imgur = Imgur()
 
-			meth(self._imgur, *args, **kwargs)
+			return meth(self._imgur, *args, **kwargs)
 		except ImgurError as e:
 			print(e)
 			raise CommandError()
@@ -24,14 +26,23 @@ class Client(Subcommand):
 	def gallery(self):
 		pass
 
-	@subcmd
+
+	def result_common(self, pages=1, max_results=None):
+		'''Common params for subcommands that return results.
+		pages:		number of pages of results needed
+		max_results:	maximum number of results needed'''
+
+		self._pages = self.validate_int(pages, min=0, desc='number of pages')
+		self._max_results = self.validate_int(max_results, min=0, desc='number of results')
+
+
+	@subcmd(add=[result_common])
 	def search(self, query, 
-			image_type=Arg(opt=True, default=None, choices=Imgur.image_types),
-			image_size=Arg(opt=True, default=None, choices=Imgur.image_sizes.keys()),
-			query_type=Arg(opt=True, default=None, choices=Imgur.query_types.keys()),
-			sort=Arg(opt=True, default='time', choices=Imgur.sort_options),
-			window=Arg(opt=True, default='all', choices=Imgur.window_options),
-			pages=1, max_results=None):
+			image_type=Arg(opt=True, default=None, choices=names(ImageType)),
+			image_size=Arg(opt=True, default=None, choices=names(ImageSize)),
+			query_type=Arg(opt=True, default=None, choices=names(QueryType)),
+			sort=Arg(opt=True, default=names(SortOption)[0], choices=names(SortOption)),
+			window=Arg(opt=True, default=names(WindowOption)[0], choices=names(WindowOption))):
 
 		'''Search imgur.
 		query:		search term(s)
@@ -39,24 +50,49 @@ class Client(Subcommand):
 		image_size:	image size desired
 		query_type:	query type
 		sort:		sort options
-		window:		date range for results
-		pages:		number of pages of results needed'''
+		window:		date range for results'''
 
-		try:
-			pages = int(pages)
-			if pages < 0:
-				print('number of pages should be >0')
-				raise CommandError()
-			max_results = int(max_results) if max_results is not None else None
-		except ValueError as e:
-			print(e)
-			raise CommandError()
+		gen = self.exc_imgur_call(Imgur.search, query, 
+				enumattr(ImageType, image_type), enumattr(ImageSize, image_size), enumattr(QueryType, query_type),
+				sort, window, self._pages, max_results=self._max_results)
+		self.print_gen_result(gen)
 
-		self.exc_imgur_call(Imgur.search, query, image_type, image_size, query_type, sort, window, pages, max_results=max_results)
+
+	def print_gen_result(self, gen):
+		printer = ResultPrinter()
+		for r in gen:
+			printer.printf(r)
 
 
 	@subcmd
-	def album(self):
-		pass
+	def album(self, album_id):
+		self.exc_imgur_call(Imgur.album, album_id)
+
+
+	@subcmd(add=[result_common])
+	def favorites(self, username, query=None, query_type=None):
+		'''Get gallery favorites for a user.
+		username:	username for the user
+		result_type:	album / image
+		query:		query to filter the results
+		query_type:	query type'''
+
+		gen = self.exc_imgur_call(Imgur.gallery_favorites, username, pages=self._pages, max_results=self._max_results)
+		self.print_gen_result(gen)
+
+
+	def validate_int(self, val, min=None, max=None, desc='value'):
+		res = None
+		if val is not None:
+			try:
+				res = int(float(val))
+				if min is not None and res < min:
+					print('%s should be >%d'%(desc, min))
+					raise CommandError()
+			except ValueError as e:
+				print("math says '%s' is not a valid number"%val)
+				raise CommandError()
+
+		return res
 
 

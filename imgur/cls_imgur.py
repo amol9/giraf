@@ -5,7 +5,10 @@ from os.path import exists
 
 from redlib.api.prnt import *
 from imgurpython import ImgurClient
-from imgurpython.helpers import GalleryAlbum, GalleryImage
+from imgurpython.helpers.error import ImgurClientError 
+
+from .pager import Pager
+from .enums import QueryType
 
 
 class ImgurError(Exception):
@@ -16,13 +19,6 @@ class Imgur:
 	
 	client_id = '3210fb6c4dc60b8'
 	cred_file = '.cred'
-
-	image_types = ['jpg', 'png', 'gif', 'anigif', 'album']
-	image_sizes = {'small': 'small', 'medium': 'med', 'big': 'big', 'large': 'lrg', 'huge': 'huge'}
-	query_types = {'all': 'q_all', 'any': 'q_any', 'exactly': 'q_exactly', 'not': 'q_not'}
-
-	sort_options = ['time', 'viral', 'top']
-	window_options = ['week', 'month', 'year', 'all']
 
 
 	def __init__(self):
@@ -70,7 +66,6 @@ class Imgur:
 
 	def get_account(self):
 		acct = self.client.get_account('')
-		import pdb; pdb.set_trace()
 		print(acct)
 
 
@@ -80,44 +75,29 @@ class Imgur:
 		if any(i is not None for i in [image_type, image_size, query_type]):
 			advanced = {}
 			if image_type is not None:
-				advanced['q_type'] = image_type
+				advanced['q_type'] = image_type.name
 			if image_size is not None:
-				advanced['q_size_px'] = self.image_sizes[image_size]
-			if query_type is not None:
-				advanced[self.query_types[query_type]] = query
+				advanced['q_size_px'] = image_size.value
+			if query_type is None:
+				query_type = QueryType.all
 
-		result_start = 1
-		for page in range(0, pages):
-			result = self.client.gallery_search(query, advanced=advanced, sort=sort, window=window, page=page)
-			if max_results is not None:
-				d = max_results - result_start + 1
-				if d < len(result):
-					del result[d : len(result)]
+			advanced[query_type.value] = query
 
-			self.print_result(result, result_start)
-			result_start += len(result)
+		pager = Pager(pages=pages, max_results=max_results)
+		for p in pager.run(self.client.gallery_search, query, advanced=advanced, sort=sort, window=window):
+			yield p
 
+	
+	def album(self, album_id):
+		try:
+			album = self.client.get_album(album_id)
+			return album
+		except ImgurClientError as e:
+			raise ImgurError(e)
 
-	def print_result(self, result, start_count):
-		count = start_count
-		up_arrow = u'\u2b06'
-		down_arrow = u'\u2b07'
-
-		for r in result:
-			print(u'{0:03d}. {1}'.format(count, r.title))
-
-			if type(r) == GalleryImage:
-				width = getattr(r, 'width', 0)
-				height = getattr(r, 'height', 0)
-				dimensions = '%dx%d'%(width, height)
-				score = u'%s %d %s %d'%(up_arrow, r.ups, down_arrow, r.downs)
-				print(u'  {0:<8} {1:<10} {2:<14} {3}'.format('Image', dimensions, score, r.link))
-			else:
-				print('  {0:<8} {1:<12} {2}'.format('Album', str(r.images_count) + ' images', r.link))
-			count += 1
-
-
-	def album(self, aid):
-		a = self.client.get_album(aid)
-		print a.title, a.images_count
+	
+	def gallery_favorites(self, username, pages, max_results=None, gtype=None, query=None):
+		pager = Pager(pages=pages, max_results=max_results)
+		for p in pager.run(self.client.get_gallery_favorites, username):
+			yield p
 
