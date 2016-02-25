@@ -1,5 +1,5 @@
 
-from imgurpython.helpers import GalleryAlbum, GalleryImage
+from .enums import GalleryType
 
 
 class ResultPrinter:
@@ -15,7 +15,7 @@ class ResultPrinter:
 		for r in result:
 			print(u'{0:03d}. {1}'.format(self._start_count, r.title))
 
-			if type(r) == GalleryImage:
+			if type(r) == GalleryType.image.value:
 				width = getattr(r, 'width', 0)
 				height = getattr(r, 'height', 0)
 				dimensions = '%dx%d'%(width, height)

@@ -11,6 +11,9 @@ from .pager import Pager
 from .enums import QueryType
 
 
+__all__ = ['Imgur', 'ImgurError'] 
+
+
 class ImgurError(Exception):
 	pass
 

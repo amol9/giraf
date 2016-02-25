@@ -1,4 +1,6 @@
 
+from redlib.api.py23 import enum_names, enum_values, enum_attr
+
 from redcmd.api import Subcommand, subcmd, Arg, CommandError
 from .cls_imgur import Imgur, ImgurError
 from .result_printer import ResultPrinter
@@ -38,11 +40,11 @@ class Client(Subcommand):
 
 	@subcmd(add=[result_common])
 	def search(self, query, 
-			image_type=Arg(opt=True, default=None, choices=names(ImageType)),
-			image_size=Arg(opt=True, default=None, choices=names(ImageSize)),
-			query_type=Arg(opt=True, default=None, choices=names(QueryType)),
-			sort=Arg(opt=True, default=names(SortOption)[0], choices=names(SortOption)),
-			window=Arg(opt=True, default=names(WindowOption)[0], choices=names(WindowOption))):
+			image_type=Arg(opt=True, default=None, choices=enum_names(ImageType)),
+			image_size=Arg(opt=True, default=None, choices=enum_names(ImageSize)),
+			query_type=Arg(opt=True, default=None, choices=enum_names(QueryType)),
+			sort=Arg(opt=True, default=enum_names(SortOption)[0], choices=enum_names(SortOption)),
+			window=Arg(opt=True, default=enum_names(WindowOption)[0], choices=enum_names(WindowOption))):
 
 		'''Search imgur.
 		query:		search term(s)
@@ -53,7 +55,7 @@ class Client(Subcommand):
 		window:		date range for results'''
 
 		gen = self.exc_imgur_call(Imgur.search, query, 
-				enumattr(ImageType, image_type), enumattr(ImageSize, image_size), enumattr(QueryType, query_type),
+				enum_attr(ImageType, image_type), enum_attr(ImageSize, image_size), enum_attr(QueryType, query_type),
 				sort, window, self._pages, max_results=self._max_results)
 		self.print_gen_result(gen)
 
