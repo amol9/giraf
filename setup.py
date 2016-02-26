@@ -37,5 +37,5 @@ setup(
 )
 
 
-setup_autocomp('imgur.client', 'imgur', _to_hyphen=True)
+setup_autocomp('imgur.client.all_subcommands', 'imgur', _to_hyphen=True)
 

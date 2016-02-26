@@ -1,7 +1,7 @@
 
 from redcmd.api import commandline_execute
 
-from .client import Client
+from .client.all_subcommands import *
 from . import const
 from .version import __version__
 

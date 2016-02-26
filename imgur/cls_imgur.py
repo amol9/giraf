@@ -91,12 +91,21 @@ class Imgur:
 			yield p
 
 	
-	def album(self, album_id):
+	def album_info(self, album_id):
+		return self.get_album(album_id)
+
+
+	def get_album(self, album_id):
 		try:
 			album = self.client.get_album(album_id)
 			return album
 		except ImgurClientError as e:
 			raise ImgurError(e)
+
+	
+	def album_image_urls(self, album_id):
+		album = self.get_album(album_id)
+		return [i.get('link', None)  for i in album.images]
 
 	
 	def gallery_favorites(self, username, pages, max_results=None, gtype=None, query=None):
