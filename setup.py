@@ -7,19 +7,19 @@ from setuptools import setup, find_packages
 
 from rc_setup import setup_autocomp
 
-from giraff.version import __version__
+from cmdur.version import __version__
 
 
 entry_points = {}
-entry_points['console_scripts'] = ['giraff=giraff.main:main']
+entry_points['console_scripts'] = ['cmdur=cmdur.main:main']
 
 setup(	
-	name			= 'giraff',
+	name			= 'cmdur',
 	version			= __version__,
 	description		= 'API and command line client for imgur.com.',
 	author			= 'Amol Umrale',
 	author_email 		= 'babaiscool@gmail.com',
-	url			= 'http://pypi.python.org/pypi/giraff/',
+	url			= 'http://pypi.python.org/pypi/cmdur/',
 	packages		= find_packages(), 
 	include_package_data	= True,
 	scripts			= ['ez_setup.py', 'rc_setup.py'],
@@ -37,5 +37,5 @@ setup(
 )
 
 
-setup_autocomp('giraff.client.all_subcommands', 'giraff', _to_hyphen=True)
+setup_autocomp('cmdur.client.all_subcommands', 'cmdur', _to_hyphen=True)
 

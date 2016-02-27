@@ -1,1 +1,1 @@
-recursive-exclude giraff/test *
+recursive-exclude cmdur/test *
