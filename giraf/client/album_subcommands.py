@@ -1,7 +1,7 @@
 
 from redcmd.api import Subcommand, subcmd, Arg, CommandError
 
-from ..cls_imgur import Imgur
+from ..imgur import Imgur
 
 from .subcommand_mixin import SubcommandMixin
 from .printers import AlbumInfoPrinter

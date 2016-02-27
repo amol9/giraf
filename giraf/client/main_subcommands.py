@@ -3,7 +3,7 @@ from redlib.api.py23 import enum_names, enum_values, enum_attr
 from redcmd.api import Subcommand, subcmd, Arg
 
 from ..enums import *
-from ..cls_imgur import Imgur
+from ..imgur import Imgur
 
 from .printers import ResultPrinter
 from .subcommand_mixin import SubcommandMixin

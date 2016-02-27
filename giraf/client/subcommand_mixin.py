@@ -1,7 +1,7 @@
 
 from redcmd.api import CommandError
 
-from ..cls_imgur import Imgur, ImgurError
+from ..imgur import Imgur, ImgurError
 
 
 class SubcommandMixin(object):
