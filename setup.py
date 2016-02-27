@@ -7,24 +7,24 @@ from setuptools import setup, find_packages
 
 from rc_setup import setup_autocomp
 
-from giraf.version import __version__
+from giraff.version import __version__
 
 
 entry_points = {}
-entry_points['console_scripts'] = ['giraf=giraf.main:main']
+entry_points['console_scripts'] = ['giraff=giraff.main:main']
 
 setup(	
-	name			= 'giraf',
+	name			= 'giraff',
 	version			= __version__,
 	description		= 'API and command line client for imgur.com.',
 	author			= 'Amol Umrale',
 	author_email 		= 'babaiscool@gmail.com',
-	url			= 'http://pypi.python.org/pypi/giraf/',
+	url			= 'http://pypi.python.org/pypi/giraff/',
 	packages		= find_packages(), 
 	include_package_data	= True,
 	scripts			= ['ez_setup.py', 'rc_setup.py'],
 	entry_points 		= entry_points,
-	install_requires	= ['imgurpython>=1.1.7', 'redlib>=1.2.0', 'redcmd>=1.1.7', 'enum34'],
+	install_requires	= ['imgurpython>=1.1.7', 'redlib>=1.3.0', 'redcmd>=1.1.7', 'enum34'],
 	classifiers		= [
 					'Development Status :: 4 - Beta',
 					'Environment :: Console',
@@ -37,5 +37,5 @@ setup(
 )
 
 
-setup_autocomp('giraf.client.all_subcommands', 'giraf', _to_hyphen=True)
+setup_autocomp('giraff.client.all_subcommands', 'giraff', _to_hyphen=True)
 

@@ -2,8 +2,10 @@ import sys
 import webbrowser
 from os import linesep
 from os.path import exists
+from base64 import b64decode
 
-from redlib.api.prnt import *
+from redlib.api.misc import ob
+from redlib.api.system import is_py3
 from imgurpython import ImgurClient
 from imgurpython.helpers.error import ImgurClientError 
 
@@ -20,12 +22,14 @@ class ImgurError(Exception):
 
 
 class Imgur:
-	
-	client_id = '3210fb6c4dc60b8'
+	client_id = ob(b64decode('BwpTXAIFBlBNAwtFXFkP'))
 	cred_file = '.cred'
 
 
 	def __init__(self):
+		if is_py3():
+			self.client_id = self.client_id.decode('ascii')
+
 		self.client = ImgurClient(self.client_id, '')
 
 	

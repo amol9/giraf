@@ -1,6 +1,6 @@
-=====
-giraf
-=====
+======
+giraff
+======
 
 A command line utility to access imgur.com and api for use in applications.
 
@@ -25,17 +25,17 @@ Usage
 
 * Search::
 
-    giraf search cat -p 2                       # search cat, get 2 pages of result
-    giraf search dog -s viral -i gif -m 10      # search dog, sort by most viral, images of type gif, maximum of 10 results
+    giraff search cat -p 2                       # search cat, get 2 pages of result
+    giraff search dog -s viral -i gif -m 10      # search dog, sort by most viral, images of type gif, maximum of 10 results
 
 * For help on commands, see:: 
   
-    giraf -h
+    giraff -h
 
 
 Download
 ========
 
-* PyPI: http://pypi.python.org/pypi/giraf
-* Source: https://github.com/amol9/giraf
+* PyPI: http://pypi.python.org/pypi/giraff
+* Source: https://github.com/amol9/giraff
 
