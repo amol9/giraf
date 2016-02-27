@@ -7,19 +7,19 @@ from setuptools import setup, find_packages
 
 from rc_setup import setup_autocomp
 
-from cmdur.version import __version__
+from giraf.version import __version__
 
 
 entry_points = {}
-entry_points['console_scripts'] = ['cmdur=cmdur.main:main']
+entry_points['console_scripts'] = ['giraf=giraf.main:main']
 
 setup(	
-	name			= 'cmdur',
+	name			= 'giraf',
 	version			= __version__,
 	description		= 'API and command line client for imgur.com.',
 	author			= 'Amol Umrale',
 	author_email 		= 'babaiscool@gmail.com',
-	url			= 'http://pypi.python.org/pypi/cmdur/',
+	url			= 'http://pypi.python.org/pypi/giraf/',
 	packages		= find_packages(), 
 	include_package_data	= True,
 	scripts			= ['ez_setup.py', 'rc_setup.py'],
@@ -37,5 +37,5 @@ setup(
 )
 
 
-setup_autocomp('cmdur.client.all_subcommands', 'cmdur', _to_hyphen=True)
+setup_autocomp('giraf.client.all_subcommands', 'giraf', _to_hyphen=True)
 
