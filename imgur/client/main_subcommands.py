@@ -25,8 +25,8 @@ class MainSubcommands(Subcommand, SubcommandMixin):
 			image_type=Arg(opt=True, default=None, choices=enum_names(ImageType)),
 			image_size=Arg(opt=True, default=None, choices=enum_names(ImageSize)),
 			query_type=Arg(opt=True, default=None, choices=enum_names(QueryType)),
-			sort=Arg(opt=True, default=enum_names(SortOption)[0], choices=enum_names(SortOption)),
-			window=Arg(opt=True, default=enum_names(WindowOption)[0], choices=enum_names(WindowOption)),
+			sort=Arg(opt=True, default=SortOption.time.name, choices=enum_names(SortOption)),
+			window=Arg(opt=True, default=WindowOption.all.name, choices=enum_names(WindowOption)),
 			result_type=Arg(opt=True, default=None, choices=enum_names(GalleryType))):
 
 		'''Search imgur.

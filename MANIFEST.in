@@ -1,1 +1,1 @@
-recursive-exclude imgur/test *
+recursive-exclude giraf/test *
