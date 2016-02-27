@@ -24,7 +24,7 @@ setup(
 	include_package_data	= True,
 	scripts			= ['ez_setup.py', 'rc_setup.py'],
 	entry_points 		= entry_points,
-	install_requires	= ['imgurpython>=1.1.7', 'redlib>=1.1.4', 'redcmd>=1.1.7', 'enum34'],
+	install_requires	= ['imgurpython>=1.1.7', 'redlib>=1.2.0', 'redcmd>=1.1.7', 'enum34'],
 	classifiers		= [
 					'Development Status :: 4 - Beta',
 					'Environment :: Console',

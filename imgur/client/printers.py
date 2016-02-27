@@ -1,12 +1,39 @@
 import sys
 
 from redlib.api.prnt import ColumnPrinter
+from redlib.api.system import is_py3
+
 from ..enums import GalleryType
 
 
+enc_utf8 = sys.stdout.encoding == 'UTF-8'
+
+
+def ignore_u(s):
+	if enc_utf8:
+		return s
+
+	if is_py3():
+		s2 = bytes(s, 'utf-8') if type(s) == str else s
+		return s2.decode('ascii', 'ignore')
+	else:
+		return s.decode('unicode_escape').encode('ascii', 'ignore')
+
+
+def str_if_not(s):
+	#print('s: ' + s + str(type(s)))
+	if is_py3():
+		if not (type(s) == str or type(s) == bytes):
+			return str(s)
+	else:
+		if not (type(s) == str or type(s) == unicode):
+			return str(s)
+	return s
+
+
 class ResultPrinter:
-	up_arrow = u'\u2b06' if sys.stdout.isatty() else 'u'
-	down_arrow = u'\u2b07' if sys.stdout.isatty() else 'd'
+	up_arrow = u'\u2b06' if enc_utf8 else 'u'
+	down_arrow = u'\u2b07' if enc_utf8 else 'd'
 
 
 	def __init__(self):
@@ -18,7 +45,7 @@ class ResultPrinter:
 		#aprinter = ColumnPrinter(cols=[8, 12, -1])
 
 		for r in result:
-			print(u'{0:03d}. {1}'.format(self._start_count, r.title))
+			print(u'{0:03d}. {1}'.format(self._start_count, ignore_u(r.title)))
 
 			if type(r) == GalleryType.image.value:
 				width = getattr(r, 'width', 0)
@@ -44,5 +71,5 @@ class AlbumInfoPrinter:
 		printer = ColumnPrinter(cols=[15, -1])
 
 		for field, title in self.fields:
-			printer.printf(title + ':', str(getattr(album, field, '')))
+			printer.printf(title + ':', ignore_u(str_if_not(getattr(album, field, ''))))
 

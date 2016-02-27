@@ -18,21 +18,21 @@ class Pager:
 			if len(result) == 0:
 				return
 
-			if self._max_results is not None:
-				d = self._max_results - count
-				if d < len(result):
-					del result[d : len(result)]
-
+			fresult = []
 			if self._filter is not None:
-				fresult = []
 				for r in result:
 					if self._filter.match(r):
 						fresult.append(r)
-				yield fresult
-				count += len(fresult)
 			else:
-				yield result
-				count += len(result)
+				fresult = result
+
+			if self._max_results is not None:
+				d = self._max_results - count
+				if d < len(fresult):
+					del fresult[d : len(fresult)]
+
+			yield fresult
+			count += len(fresult)
 
 			if self._max_results is not None and count >= self._max_results:
 				return

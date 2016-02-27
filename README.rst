@@ -15,21 +15,20 @@ Supported platforms
 Features
 ========
 
-
-
-Dependencies
-============
-
+* Search imgur.
+* Get favorites for a user.
+* Get album info or image url list.
 
 
 Usage
 =====
 
-* Search imgur.com::
+* Search::
 
-    imgur search
+    imgur search cat -p 2                       # search cat, get 2 pages of result
+    imgur search dog -s viral -i gif -m 10      # search dog, sort by most viral, images of type gif, maximum of 10 results
 
-* For more commands, see:: 
+* For help on commands, see:: 
   
     imgur -h
 

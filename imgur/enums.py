@@ -3,7 +3,7 @@ from enum import Enum
 from imgurpython.helpers import GalleryAlbum, GalleryImage
 
 
-__all__ = ['ImageType', 'ImageSize', 'QueryType', 'SortOption', 'WindowOption', 'GalleryType']
+__all__ = ['ImageType', 'ImageSize', 'QueryType', 'SortOption', 'WindowOption', 'GalleryType', 'GalleryImage', 'GalleryAlbum']
 
 
 ImageType 	= Enum('Imagetype', 	['jpg', 'png', 'gif', 'anigif', 'album'])
