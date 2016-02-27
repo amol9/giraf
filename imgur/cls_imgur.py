@@ -9,6 +9,7 @@ from imgurpython.helpers.error import ImgurClientError
 
 from .pager import Pager
 from .enums import QueryType
+from .filter import Filter
 
 
 __all__ = ['Imgur', 'ImgurError'] 
@@ -72,7 +73,7 @@ class Imgur:
 		print(acct)
 
 
-	def search(self, query, image_type, image_size, query_type, sort, window, pages, max_results=None):
+	def search(self, query, image_type=None, image_size=None, query_type=None, sort=None, window=None, pages=1, max_results=None, gallery_type=None):
 		advanced = None
 
 		if any(i is not None for i in [image_type, image_size, query_type]):
@@ -86,7 +87,9 @@ class Imgur:
 
 			advanced[query_type.value] = query
 
-		pager = Pager(pages=pages, max_results=max_results)
+		filter = Filter(gallery_type=gallery_type)
+		pager = Pager(pages=pages, max_results=max_results, filter=filter)
+
 		for p in pager.run(self.client.gallery_search, query, advanced=advanced, sort=sort, window=window):
 			yield p
 
@@ -108,8 +111,10 @@ class Imgur:
 		return [i.get('link', None)  for i in album.images]
 
 	
-	def gallery_favorites(self, username, pages, max_results=None, gtype=None, query=None):
-		pager = Pager(pages=pages, max_results=max_results)
+	def gallery_favorites(self, username, pages=1, max_results=None, query=None, query_type=None, gallery_type=None):
+		filter = Filter(query=query, query_type=query_type, gallery_type=gallery_type)
+		pager = Pager(pages=pages, max_results=max_results, filter=filter)
+
 		for p in pager.run(self.client.get_gallery_favorites, username):
 			yield p
 

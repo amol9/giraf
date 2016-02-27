@@ -20,7 +20,7 @@ setup(
 	author			= 'Amol Umrale',
 	author_email 		= 'babaiscool@gmail.com',
 	url			= 'http://pypi.python.org/pypi/imgur/',
-	packages		= ['imgur'], 
+	packages		= find_packages(), 
 	include_package_data	= True,
 	scripts			= ['ez_setup.py', 'rc_setup.py'],
 	entry_points 		= entry_points,

@@ -1,11 +1,12 @@
+import sys
 
 from redlib.api.prnt import ColumnPrinter
 from ..enums import GalleryType
 
 
 class ResultPrinter:
-	up_arrow = u'\u2b06'
-	down_arrow = u'\u2b07'
+	up_arrow = u'\u2b06' if sys.stdout.isatty() else 'u'
+	down_arrow = u'\u2b07' if sys.stdout.isatty() else 'd'
 
 
 	def __init__(self):
