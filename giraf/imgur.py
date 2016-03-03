@@ -8,17 +8,25 @@ from redlib.api.misc import ob
 from redlib.api.system import is_py3
 from imgurpython import ImgurClient
 from imgurpython.helpers.error import ImgurClientError 
+from enum import Enum
 
 from .pager import Pager
-from .enums import QueryType
+from .enums import QueryType, SortOption, WindowOption
 from .filter import Filter
+from .helper import get_image_link
 
 
-__all__ = ['Imgur', 'ImgurError'] 
+__all__ = ['Imgur', 'ImgurError', 'ImgurErrorType'] 
+
+
+ImgurErrorType = Enum('ImgurErrorType', ['not_found', 'capacity', 'other'])
 
 
 class ImgurError(Exception):
-	pass
+
+	def __init__(self, msg, err_type=ImgurErrorType.other):
+		super(ImgurError, self).__init__(msg)
+		self.err_type = err_type
 
 
 class Imgur:
@@ -77,7 +85,8 @@ class Imgur:
 		print(acct)
 
 
-	def search(self, query, image_type=None, image_size=None, query_type=None, sort=None, window=None, pages=1, max_results=None, gallery_type=None):
+	def search(self, query, image_type=None, image_size=None, query_type=None, sort=SortOption.time, window=WindowOption.all,
+			pages=1, max_results=None, gallery_type=None, animated=None):
 		advanced = None
 
 		if any(i is not None for i in [image_type, image_size, query_type]):
@@ -91,11 +100,12 @@ class Imgur:
 
 			advanced[query_type.value] = query
 
-		filter = Filter(gallery_type=gallery_type)
+		filter = Filter(gallery_type=gallery_type, animated=animated)
 		pager = Pager(pages=pages, max_results=max_results, filter=filter)
 
-		for p in pager.run(self.client.gallery_search, query, advanced=advanced, sort=sort, window=window):
-			yield p
+		for page in pager.run(self.client.gallery_search, query, advanced=advanced, sort=sort.name, window=window.name):
+			for r in page:
+				yield r
 
 	
 	def album_info(self, album_id):
@@ -107,12 +117,17 @@ class Imgur:
 			album = self.client.get_album(album_id)
 			return album
 		except ImgurClientError as e:
-			raise ImgurError(e)
+			if e.status_code == 404:
+				err_type = ImgurErrorType.not_found
+			else:
+				err_type = ImgurErrorType.other
+
+			raise ImgurError(e, err_type=err_type)
 
 	
 	def album_image_urls(self, album_id):
 		album = self.get_album(album_id)
-		return [i.get('link', None)  for i in album.images]
+		return [get_image_link(i) for i in album.images]
 
 	
 	def gallery_favorites(self, username, pages=1, max_results=None, query=None, query_type=None, gallery_type=None):

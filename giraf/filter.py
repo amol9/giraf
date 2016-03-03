@@ -3,18 +3,22 @@ from .enums import QueryType, GalleryType
 
 class Filter:
 
-	def __init__(self, pages=1, max_results=None, query=None, query_type=None, gallery_type=None):
+	def __init__(self, pages=1, max_results=None, query=None, query_type=None, gallery_type=None, animated=None):
 		self.pages 		= pages
 		self.max_results	= max_results
 		self.query		= query.lower() if query is not None else None
 		self.query_type		= query_type if query_type is not None else QueryType.all
 		self.gallery_type	= gallery_type
+		self.animated		= animated
 
 	
 	def match(self, result_item):
 		result = True
 
 		if self.gallery_type is not None and type(result_item) != self.gallery_type.value:
+			return False
+
+		if type(result_item) == GalleryType.image.value and self.animated is not None and result_item.animated != self.animated:
 			return False
 
 		if self.query is not None:

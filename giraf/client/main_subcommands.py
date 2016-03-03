@@ -40,7 +40,8 @@ class MainSubcommands(Subcommand, SubcommandMixin):
 
 		gen = self.exc_imgur_call(Imgur.search, query, 
 				image_type=enum_attr(ImageType, image_type), image_size=enum_attr(ImageSize, image_size),
-				query_type=enum_attr(QueryType, query_type), sort=sort, window=window, pages=self._pages,
+				query_type=enum_attr(QueryType, query_type), sort=enum_attr(SortOption, sort),
+				window=enum_attr(WindowOption, window), pages=self._pages,
 				max_results=self._max_results, gallery_type=enum_attr(GalleryType, result_type))
 
 		self.print_gen_result(gen)
