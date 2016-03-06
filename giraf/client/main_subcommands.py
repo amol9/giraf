@@ -1,9 +1,10 @@
 
 from redlib.api.py23 import enum_names, enum_values, enum_attr
-from redcmd.api import Subcommand, subcmd, Arg
+from redcmd.api import Subcommand, subcmd, Arg, EnumArg
 
 from ..enums import *
 from ..imgur import Imgur
+from ..filter import Filter
 
 from .printers import ResultPrinter
 from .subcommand_mixin import SubcommandMixin
@@ -11,61 +12,49 @@ from .subcommand_mixin import SubcommandMixin
 
 class MainSubcommands(Subcommand, SubcommandMixin):
 
-	#def __init__(self):
-	#	super(MainSubcommands, self).__init__()
-
-
 	#@subcmd
 	def gallery(self):
 		pass
 
 
-	@subcmd(add=[SubcommandMixin.result_common])
-	def search(self, query, 
-			image_type=Arg(opt=True, default=None, choices=enum_names(ImageType)),
-			image_size=Arg(opt=True, default=None, choices=enum_names(ImageSize)),
-			query_type=Arg(opt=True, default=None, choices=enum_names(QueryType)),
-			sort=Arg(opt=True, default=SortOption.time.name, choices=enum_names(SortOption)),
-			window=Arg(opt=True, default=WindowOption.all.name, choices=enum_names(WindowOption)),
-			result_type=Arg(opt=True, default=None, choices=enum_names(GalleryType))):
+	@subcmd(add=['result', 'sort', 'window', 'result_type'])
+	def search(self, query, image_type=EnumArg(opt=True, choices=ImageType), image_size=EnumArg(opt=True, choices=ImageSize),
+			query_type=EnumArg(opt=True, choices=QueryType)):
 
 		'''Search imgur.
 		query:		search term(s)
 		image_type:	image type desired
 		image_size:	image size desired
-		query_type:	query type
-		sort:		sort options
-		window:		date range for results
-		result_type:	album / image'''
+		query_type:	query type'''
 
-		gen = self.exc_imgur_call(Imgur.search, query, 
-				image_type=enum_attr(ImageType, image_type), image_size=enum_attr(ImageSize, image_size),
-				query_type=enum_attr(QueryType, query_type), sort=enum_attr(SortOption, sort),
-				window=enum_attr(WindowOption, window), pages=self._pages,
-				max_results=self._max_results, gallery_type=enum_attr(GalleryType, result_type))
-
+		self._filter.query 	= query
+		self._filter.image_type = image_type
+		self._filter.image_size = image_size
+		self._filter.query_type = query_type
+		
+		gen = self.exc_imgur_call(Imgur.search, self._filter)
 		self.print_gen_result(gen)
 
 
 	def print_gen_result(self, gen):
-		printer = ResultPrinter()
+		printer = ResultPrinter(urls_only=self._urls_only)
 		for r in gen:
 			printer.printf(r)
 
 
-	@subcmd(add=[SubcommandMixin.result_common])
-	def favorites(self, username, query=None,
-			query_type=Arg(opt=True, default=None, choices=enum_names(QueryType)),
-			result_type=Arg(opt=True, default=None, choices=enum_names(GalleryType))):
-
+	@subcmd(add=['result', 'opt_query'])
+	def favorites(self, username):
 		'''Get gallery favorites for a user.
-		username:	username for the user
-		query:		query to filter the results
-		query_type:	query type
-		result_type:	album / image'''
+		username:	username for the user'''
 
-		gen = self.exc_imgur_call(Imgur.gallery_favorites, username, pages=self._pages, max_results=self._max_results,
-				query=query, query_type=enum_attr(QueryType, query_type), gallery_type=enum_attr(GalleryType,result_type))
-
+		gen = self.exc_imgur_call(Imgur.gallery_favorites, username, self._filter) 
 		self.print_gen_result(gen)
 	
+
+	@subcmd(add=['result', 'opt_query'])
+	def subreddit(self, subreddit):
+		'''Get subreddit images.
+		subreddit: 	subreddit name'''
+
+		gen = self.exc_imgur_call(Imgur.subreddit, subreddit, self._filter)
+		self.print_gen_result(gen)

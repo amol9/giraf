@@ -3,6 +3,8 @@ import webbrowser
 from os import linesep
 from os.path import exists
 from base64 import b64decode
+import warnings
+from functools import partial
 
 from redlib.api.misc import ob
 from redlib.api.system import is_py3
@@ -11,9 +13,9 @@ from imgurpython.helpers.error import ImgurClientError
 from enum import Enum
 
 from .pager import Pager
-from .enums import QueryType, SortOption, WindowOption
+from .enums import QueryType, SortOption, WindowOption, SubredditSortOption
 from .filter import Filter
-from .helper import get_image_link
+from .helper import get_image_link, ifc
 
 
 __all__ = ['Imgur', 'ImgurError', 'ImgurErrorType'] 
@@ -37,6 +39,7 @@ class Imgur:
 	def __init__(self):
 		if is_py3():
 			self.client_id = self.client_id.decode('ascii')
+			warnings.filterwarnings('ignore', category=ResourceWarning, module='.*imgurpython.*')
 
 		self.client = ImgurClient(self.client_id, '')
 
@@ -85,27 +88,26 @@ class Imgur:
 		print(acct)
 
 
-	def search(self, query, image_type=None, image_size=None, query_type=None, sort=SortOption.time, window=WindowOption.all,
-			pages=1, max_results=None, gallery_type=None, animated=None):
+	def search(self, filter):
+		default_filter = Filter(sort=SortOption.time, window=WindowOption.all)
+		filter.add(default_filter)
+
 		advanced = None
 
-		if any(i is not None for i in [image_type, image_size, query_type]):
+		if any(i is not None for i in [filter.image_type, filter.image_size, filter.query_type]):
 			advanced = {}
-			if image_type is not None:
-				advanced['q_type'] = image_type.name
-			if image_size is not None:
-				advanced['q_size_px'] = image_size.value
-			if query_type is None:
-				query_type = QueryType.all
+			if filter.image_type is not None:
+				advanced['q_type'] = filter.image_type.name
+			if filter.image_size is not None:
+				advanced['q_size_px'] = filter.image_size.value
+			if filter.query_type is None:
+				filter.query_type = QueryType.all
 
-			advanced[query_type.value] = query
+			advanced[filter.query_type.value] = filter.query
 
-		filter = Filter(gallery_type=gallery_type, animated=animated)
-		pager = Pager(pages=pages, max_results=max_results, filter=filter)
-
-		for page in pager.run(self.client.gallery_search, query, advanced=advanced, sort=sort.name, window=window.name):
-			for r in page:
-				yield r
+		method = partial(self.client.gallery_search, filter.query, advanced=advanced)
+		pager = Pager(filter, method)
+		return pager.run()
 
 	
 	def album_info(self, album_id):
@@ -117,11 +119,7 @@ class Imgur:
 			album = self.client.get_album(album_id)
 			return album
 		except ImgurClientError as e:
-			if e.status_code == 404:
-				err_type = ImgurErrorType.not_found
-			else:
-				err_type = ImgurErrorType.other
-
+			err_type = ifc(e.status_code == 404, ImgurErrorType.not_found, ImgurErrorType.other)
 			raise ImgurError(e, err_type=err_type)
 
 	
@@ -130,10 +128,17 @@ class Imgur:
 		return [get_image_link(i) for i in album.images]
 
 	
-	def gallery_favorites(self, username, pages=1, max_results=None, query=None, query_type=None, gallery_type=None):
-		filter = Filter(query=query, query_type=query_type, gallery_type=gallery_type)
-		pager = Pager(pages=pages, max_results=max_results, filter=filter)
+	def gallery_favorites(self, username, filter):
+		method = partial(self.client.get_gallery_favorites, username) 
+		pager = Pager(filter, method)
+		return pager.run()
 
-		for p in pager.run(self.client.get_gallery_favorites, username):
-			yield p
+
+	def subreddit(self, sub, filter):
+		default_filter = Filter(sort=SubredditSortOption.time, window=WindowOption.week)
+		filter.add(default_filter)
+
+		method = partial(self.client.subreddit_gallery, sub)
+		pager = Pager(filter, method)
+		return pager.run()
 

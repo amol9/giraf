@@ -37,21 +37,30 @@ class ResultPrinter:
 	down_arrow = u'\u2b07' if enc_utf8 else 'd'
 
 
-	def __init__(self):
+	def __init__(self, urls_only=False):
 		self._start_count = 1
+		self._urls_only = urls_only
 
 		#iprinter = ColumnPrinter(cols=[8, 10, -1])
 		#aprinter = ColumnPrinter(cols=[8, 12, -1])
 
 
 	def printf(self, r):
+		if self._urls_only:
+			self.printf_urls_only(r)
+			return
+
 		print(u'{0:03d}. {1}'.format(self._start_count, ignore_u(r.title)))
 
 		if type(r) == GalleryType.image.value:
 			width = getattr(r, 'width', 0)
 			height = getattr(r, 'height', 0)
 			dimensions = '%dx%d'%(width, height)
-			score = u'%s %d %s %d'%(self.up_arrow, r.ups, self.down_arrow, r.downs)
+
+			if r.ups is not None and r.downs is not None:
+				score = u'%s %d %s %d'%(self.up_arrow, r.ups, self.down_arrow, r.downs)
+			else:
+				score = ''
 			print(u'     {0:<8} {1:<10} {2:<14} {3}'.format('Image', dimensions, score, get_image_link(r)))
 			#iprinter.printf('Image', dimensions, score, r.link)
 		else:
@@ -60,6 +69,12 @@ class ResultPrinter:
 		
 		self._start_count += 1
 
+
+	def printf_urls_only(self, r):
+		if type(r) == GalleryType.image.value:
+			print(get_image_link(r))
+		else:
+			print(r.link)
 
 
 class AlbumInfoPrinter:

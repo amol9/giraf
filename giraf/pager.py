@@ -2,18 +2,31 @@
 
 class Pager:
 
-	def __init__(self, pages=1, max_results=None, param_name='page', filter=None):
-		self._pages 		= pages
-		self._max_results 	= max_results
-		self._param_name 	= param_name
+	def __init__(self, filter, method, param_name='page'):
 		self._filter		= filter
+		self._param_name 	= param_name
+		self._method 		= method
 
 
-	def run(self, meth, *args, **kwargs):
+	def run(self):
+		start_page 	= self._filter.start_page
+		pages 		= self._filter.pages
+		max_results	= self._filter.max_results
+		sort		= self._filter.sort
+		window		= self._filter.window
+
+		kwargs = {}
+
+		if sort is not None:
+			kwargs['sort'] = sort.name
+		if window is not None:
+			kwargs['window'] = window.name
+
 		count = 0
-		for page in range(0, self._pages):
+		for page in range(start_page, start_page + pages):
+
 			kwargs[self._param_name] = page
-			result = meth(*args, **kwargs)
+			result = self._method(**kwargs)
 
 			if len(result) == 0:
 				return
@@ -26,14 +39,16 @@ class Pager:
 			else:
 				fresult = result
 
-			if self._max_results is not None:
-				d = self._max_results - count
+			if max_results is not None:
+				d = max_results - count
 				if d < len(fresult):
 					del fresult[d : len(fresult)]
 
-			yield fresult
+			for r in fresult:
+				yield r
+
 			count += len(fresult)
 
-			if self._max_results is not None and count >= self._max_results:
+			if max_results is not None and count >= max_results:
 				return
 

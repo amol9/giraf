@@ -17,13 +17,13 @@ class AlbumSubcommands(Subcommand, SubcommandMixin):
 
 class AlbumSubSubcommands(AlbumSubcommands):
 
-	def album_id_common(self, album_id):
+	def album_id(self, album_id):
 		'album_id:	id of the imgur album'
 
 		self._album_id = album_id
 
 
-	@subcmd(add=[album_id_common])
+	@subcmd(add=[album_id])
 	def info(self):
 		'Get album information.'
 
@@ -32,7 +32,7 @@ class AlbumSubSubcommands(AlbumSubcommands):
 		printer.printf(album)
 
 
-	@subcmd(add=[album_id_common])
+	@subcmd(add=[album_id])
 	def urls(self):
 		'Dump image urls from album.'
 
