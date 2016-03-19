@@ -11,6 +11,7 @@ from redlib.api.system import is_py3
 from imgurpython import ImgurClient
 from imgurpython.helpers.error import ImgurClientError 
 from enum import Enum
+from requests.exceptions import SSLError
 
 from .pager import Pager
 from .enums import QueryType, SortOption, WindowOption, SubredditSortOption
@@ -41,7 +42,7 @@ class Imgur:
 			self.client_id = self.client_id.decode('ascii')
 			warnings.filterwarnings('ignore', category=ResourceWarning, module='.*imgurpython.*')
 
-		self.client = ImgurClient(self.client_id, '')
+		self.client = self.exc_call(ImgurClient, self.client_id, '')
 
 	
 	def auth(self):
@@ -107,7 +108,7 @@ class Imgur:
 
 		method = partial(self.client.gallery_search, filter.query, advanced=advanced)
 		pager = Pager(filter, method)
-		return pager.run()
+		return self.exc_call(pager.run)
 
 	
 	def album_info(self, album_id):
@@ -115,12 +116,19 @@ class Imgur:
 
 
 	def get_album(self, album_id):
+		return self.exc_call(self.client.get_album, album_id)
+
+
+	def exc_call(self, method, *args, **kwargs):
 		try:
-			album = self.client.get_album(album_id)
-			return album
+			return method(*args, **kwargs)
+
 		except ImgurClientError as e:
 			err_type = ifc(e.status_code == 404, ImgurErrorType.not_found, ImgurErrorType.other)
 			raise ImgurError(e, err_type=err_type)
+
+		except SSLError as e:
+			raise ImgurError(str(e))
 
 	
 	def album_image_urls(self, album_id):
@@ -131,7 +139,7 @@ class Imgur:
 	def gallery_favorites(self, username, filter):
 		method = partial(self.client.get_gallery_favorites, username) 
 		pager = Pager(filter, method)
-		return pager.run()
+		return self.exc_call(pager.run)
 
 
 	def subreddit(self, sub, filter):
@@ -140,5 +148,9 @@ class Imgur:
 
 		method = partial(self.client.subreddit_gallery, sub)
 		pager = Pager(filter, method)
-		return pager.run()
+		return self.exc_call(pager.run)
+
+
+	def get_image(self, image_id):
+		return self.exc_call(self.client.get_image, image_id)
 

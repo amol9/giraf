@@ -1,10 +1,14 @@
 
 from .enums import QueryType, GalleryType
 
+
+__all__ = ['Filter']
+
+
 class Filter:
 
 	def __init__(self, pages=1, max_results=None, query=None, query_type=None, gallery_type=None, animated=None,
-			min_size=None, start_page=0, sort=None, window=None, image_size=None):
+			min_size=None, start_page=0, sort=None, window=None, image_size=None, image_type=None):
 
 		self.pages 		= pages
 		self.max_results	= max_results
@@ -17,6 +21,7 @@ class Filter:
 		self.sort		= sort
 		self.window		= window
 		self.image_size		= image_size
+		self.image_type		= image_type
 
 	
 	def match(self, result_item):
