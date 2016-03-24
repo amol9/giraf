@@ -5,10 +5,21 @@ from .enums import QueryType, GalleryType
 __all__ = ['Filter']
 
 
+class FilterResult:
+	def __init__(self):
+		self.clear()
+
+
+	def clear(self):
+		self.failed 	= 0
+		self.matched	= 0
+		self.total	= 0
+
+
 class Filter:
 
 	def __init__(self, pages=1, max_results=None, query=None, query_type=None, gallery_type=None, animated=None,
-			min_size=None, start_page=0, sort=None, window=None, image_size=None, image_type=None):
+			min_size=None, start_page=0, sort=None, window=None, image_size=None, image_type=None, max_filesize=None):
 
 		self.pages 		= pages
 		self.max_results	= max_results
@@ -22,16 +33,22 @@ class Filter:
 		self.window		= window
 		self.image_size		= image_size
 		self.image_type		= image_type
+		self.max_filesize	= max_filesize
+
+		self.result		= FilterResult()
 
 	
 	def match(self, result_item):
 		result = True
+		self.result.total += 1
 
 		if self.gallery_type is not None and type(result_item) != self.gallery_type.value:
 			return False
 
 		if type(result_item) == GalleryType.image.value:
 			if self.animated is not None and result_item.animated != self.animated:
+				return False
+			if self.max_filesize is not None and result_item.size > self.max_filesize:
 				return False
 			if self.min_size is not None and (result_item.width < self.min_size[0] or result_item.height < self.min_size[1]):
 				return False
