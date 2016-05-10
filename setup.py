@@ -5,8 +5,6 @@ import platform
 import sys
 from setuptools import setup, find_packages
 
-from rc_setup import setup_autocomp
-
 from giraf.version import __version__
 
 
@@ -35,7 +33,4 @@ setup(
 					'Programming Language :: Python :: 3.4'
 				]
 )
-
-
-setup_autocomp('giraf.client.all_subcommands', 'giraf', _to_hyphen=True)
 
