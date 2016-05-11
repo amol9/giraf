@@ -20,7 +20,7 @@ setup(
 	url			= 'http://pypi.python.org/pypi/giraf/',
 	packages		= find_packages(), 
 	include_package_data	= True,
-	scripts			= ['ez_setup.py', 'rc_setup.py'],
+	scripts			= ['ez_setup.py'],
 	entry_points 		= entry_points,
 	install_requires	= ['imgurpython>=1.1.7', 'redlib>=1.3.0', 'redcmd>=1.1.8', 'enum34'],
 	classifiers		= [
