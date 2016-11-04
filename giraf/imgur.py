@@ -14,7 +14,7 @@ from enum import Enum
 from requests.exceptions import SSLError
 
 from .pager import Pager
-from .enums import QueryType, SortOption, WindowOption, SubredditSortOption
+from .enums import QueryType, SortOption, WindowOption, SubredditSortOption, AnimatedType
 from .filter import Filter
 from .helper import get_image_link, ifc
 
@@ -131,9 +131,9 @@ class Imgur:
 			raise ImgurError(str(e))
 
 	
-	def album_image_urls(self, album_id):
+	def album_image_urls(self, album_id, animated_type=AnimatedType.mp4):
 		album = self.get_album(album_id)
-		return [get_image_link(i) for i in album.images]
+		return [get_image_link(i, animated_type.value) for i in album.images]
 
 	
 	def gallery_favorites(self, username, filter):

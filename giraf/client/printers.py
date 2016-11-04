@@ -1,6 +1,6 @@
 import sys
 
-from redlib.api.prnt import ColumnPrinter
+from redlib.api.prnt import ColumnPrinter, Column
 from redlib.api.system import is_py3
 
 from ..enums import GalleryType
@@ -84,8 +84,8 @@ class AlbumInfoPrinter:
 		pass
 
 	def printf(self, album):
-		printer = ColumnPrinter(cols=[15, -1])
+		printer = ColumnPrinter(cols=[Column(width=15), Column(fill=True)])
 
 		for field, title in self.fields:
-			printer.printf(title + ':', ignore_u(str_if_not(getattr(album, field, ''))))
+			printer.printf(title, ignore_u(str_if_not(getattr(album, field, ''))))
 

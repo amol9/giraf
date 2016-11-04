@@ -1,6 +1,6 @@
 
 
-def get_image_link(gallery_image):
+def get_image_link(gallery_image, animated_type):
 	if type(gallery_image) == dict:
 		ga = lambda a : gallery_image.get(a, None)
 	else:
@@ -9,7 +9,7 @@ def get_image_link(gallery_image):
 	if not ga('animated'):
 		return ga('link')
 	else:
-		return ga('webm')
+		return ga(animated_type)
 
 
 def ifc(cond, a, b):
